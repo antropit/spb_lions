@@ -32,6 +32,7 @@ class MainFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        activity?.setTitle(R.string.app_name)
         return inflater.inflate(R.layout.main_fragment, container, false)
     }
 
