@@ -20,7 +20,7 @@ class MainFragment : Fragment() {
 
     private lateinit var viewModel: MainViewModel
 
-    private val adapter = MainAdapter(listener = {
+    val adapter = MainAdapter(listener = {
                 viewModel.onClickItem(it)
                 activity?.supportFragmentManager?.beginTransaction()!!
                 .replace(R.id.container, DetailsFragment.newInstance())
@@ -45,6 +45,7 @@ class MainFragment : Fragment() {
         viewModel.getMedia().observe(viewLifecycleOwner, Observer {
             it?.let {
                 adapter.submitList(it)
+                MainAdapter.fullList = it.toMutableList()
             }
         })
 

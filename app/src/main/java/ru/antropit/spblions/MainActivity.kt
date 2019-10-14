@@ -2,6 +2,8 @@ package ru.antropit.spblions
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import androidx.appcompat.widget.SearchView
 import ru.antropit.spblions.ui.main.MainFragment
 
 class MainActivity : AppCompatActivity() {
@@ -14,5 +16,26 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.container, MainFragment.newInstance())
                 .commitNow()
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.main, menu)
+
+        val search = menu.findItem(R.id.action_search)
+        val searchText = search.actionView as SearchView
+        searchText.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                MainFragment.newInstance().adapter.filter.filter(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                MainFragment.newInstance().adapter.filter.filter(newText)
+                return false
+            }
+        })
+
+        return true
     }
 }
