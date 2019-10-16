@@ -54,15 +54,10 @@ class MainAdapter(private val listener: (Entity) -> Unit): RecyclerView.Adapter<
     }
 
     fun updateList(list: List<Entity>) {
-        var diffUtilCallback = DiffUtilCallback(dataList, ArrayList())
-        var diffResult =  DiffUtil.calculateDiff(diffUtilCallback)
+        val diffUtilCallback = DiffUtilCallback(dataList, list)
+        val diffResult =  DiffUtil.calculateDiff(diffUtilCallback)
 
         dataList.clear()
-        diffResult.dispatchUpdatesTo(this)
-
-        diffUtilCallback = DiffUtilCallback(dataList, list)
-        diffResult =  DiffUtil.calculateDiff(diffUtilCallback)
-
         dataList.addAll(list)
         diffResult.dispatchUpdatesTo(this)
     }
@@ -91,26 +86,6 @@ class MainAdapter(private val listener: (Entity) -> Unit): RecyclerView.Adapter<
 
     }
 
-//    fun updateList(list: ArrayList<Entity>) {
-//          if(recyclerView == null) {
-//              dataList = ArrayList(list)
-//              return
-//        }
-////
-////        dataList = ArrayList(list)
-////        notifyItemRangeRemoved(0, dataList.size)
-//        var currSize = dataList.size - 1
-//        dataList.addAll(list)
-//        notifyDataSetChanged()
-//        while (currSize >= 0) {
-//            dataList.removeAt(currSize)
-//            notifyDataSetChanged()
-////            recyclerView!!.Recycler().clear()
-////            recyclerView!!.setRecycledViewPool(RecyclerView.RecycledViewPool())
-//            currSize--
-//        }
-//    }
-
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
@@ -118,8 +93,13 @@ class MainAdapter(private val listener: (Entity) -> Unit): RecyclerView.Adapter<
                 if(charSequence.isEmpty()) {
                     filteredList = fullList!!.toMutableList()
                 } else {
-                    val keyword = charSequence.toString().toLowerCase(Locale.getDefault()).trim()
-                    filteredList = fullList!!.filter { it.name.toLowerCase(Locale.getDefault()).contains(keyword) }.toMutableList()
+                    val keywords = charSequence.toString().toLowerCase(Locale.getDefault()).trim().split(" ")
+                    filteredList = fullList!!.filter (
+                        fun(it: Entity) : Boolean {
+                            for (key in keywords)
+                                if (!it.name.toLowerCase(Locale.getDefault()).contains(key)) return false
+                            return true
+                        }).toMutableList()
                 }
 
                 val filterResults = FilterResults()

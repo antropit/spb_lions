@@ -26,12 +26,12 @@ class MainActivity : AppCompatActivity() {
         val searchText = search.actionView as SearchView
         searchText.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                MainFragment.newInstance().adapter.filter.filter(query)
+                MainFragment.adapter.filter.filter(query)
                 return true
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                MainFragment.newInstance().adapter.filter.filter(newText)
+                MainFragment.adapter.filter.filter(newText)
                 return false
             }
         })

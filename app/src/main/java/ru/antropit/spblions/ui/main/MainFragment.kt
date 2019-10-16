@@ -18,17 +18,20 @@ class MainFragment : Fragment() {
 
     companion object {
         fun newInstance() = MainFragment()
+        lateinit var adapter: MainAdapter
     }
 
     private lateinit var viewModel: MainViewModel
 
-    val adapter = MainAdapter(listener = {
-                viewModel.onClickItem(it)
-                activity?.supportFragmentManager?.beginTransaction()!!
+    init {
+        adapter = MainAdapter(listener = {
+            viewModel.onClickItem(it)
+            activity?.supportFragmentManager?.beginTransaction()!!
                 .replace(ru.antropit.spblions.R.id.container, DetailsFragment.newInstance())
                 .addToBackStack(null)
                 .commit()
-         })
+        })
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

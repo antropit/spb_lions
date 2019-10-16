@@ -6,19 +6,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import com.bumptech.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.details_fragment.*
 
 import ru.antropit.spblions.R
 import ru.antropit.spblions.databinding.DetailsFragmentBinding
-import ru.antropit.spblions.ui.main.MainFragment
 
 class DetailsFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
