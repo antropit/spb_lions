@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -15,31 +14,32 @@ import ru.antropit.spblions.api.model.Entity
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MainAdapter(private val listener: (Entity) -> Unit): ListAdapter<Entity, MainAdapter.MainHolder>(
-    DIFF_CALLBACK), Filterable {
 
+class MainAdapter(private val listener: (Entity) -> Unit): RecyclerView.Adapter<MainAdapter.MainViewHolder>(), Filterable {
     companion object {
+        var dataList: MutableList<Entity> = ArrayList()
         var fullList: List<Entity>? = null
-        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Entity>() {
-            override fun areItemsTheSame(p0: Entity, p1: Entity): Boolean {
-                return p0.id == p1.id
-            }
-
-            override fun areContentsTheSame(p0: Entity, p1: Entity): Boolean {
-                return p0 == p1
-            }
-        }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, p1: Int): MainHolder {
-        return MainHolder(LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item, parent, false))
+    private var recyclerView: RecyclerView? = null
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+
+        this.recyclerView = recyclerView
     }
 
-    override fun onBindViewHolder(holder: MainHolder, position: Int) {
-        holder.bind(getItem(position))
+    override fun getItemCount(): Int = dataList.size
+
+    override fun onCreateViewHolder(parent: ViewGroup, p1: Int): MainViewHolder {
+        return MainViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item, parent, false))
     }
 
-    inner class MainHolder(private val view: View): RecyclerView.ViewHolder(view) {
+    override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
+        holder.bind(dataList[position])
+    }
+
+    inner class MainViewHolder(private val view: View): RecyclerView.ViewHolder(view) {
         fun bind(item: Entity) {
             view.name.text = item.name
             view.description.text = item.description
@@ -53,6 +53,64 @@ class MainAdapter(private val listener: (Entity) -> Unit): ListAdapter<Entity, M
         }
     }
 
+    fun updateList(list: List<Entity>) {
+        var diffUtilCallback = DiffUtilCallback(dataList, ArrayList())
+        var diffResult =  DiffUtil.calculateDiff(diffUtilCallback)
+
+        dataList.clear()
+        diffResult.dispatchUpdatesTo(this)
+
+        diffUtilCallback = DiffUtilCallback(dataList, list)
+        diffResult =  DiffUtil.calculateDiff(diffUtilCallback)
+
+        dataList.addAll(list)
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    fun submitList(list: ArrayList<Entity>) {
+        fullList = ArrayList(list)
+        updateList(list)
+    }
+
+    inner class DiffUtilCallback(private val oldList: List<Entity>, private val newList: List<Entity>): DiffUtil.Callback() {
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldItemPosition == newItemPosition
+        }
+
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].name == newList[newItemPosition].name
+        }
+
+    }
+
+//    fun updateList(list: ArrayList<Entity>) {
+//          if(recyclerView == null) {
+//              dataList = ArrayList(list)
+//              return
+//        }
+////
+////        dataList = ArrayList(list)
+////        notifyItemRangeRemoved(0, dataList.size)
+//        var currSize = dataList.size - 1
+//        dataList.addAll(list)
+//        notifyDataSetChanged()
+//        while (currSize >= 0) {
+//            dataList.removeAt(currSize)
+//            notifyDataSetChanged()
+////            recyclerView!!.Recycler().clear()
+////            recyclerView!!.setRecycledViewPool(RecyclerView.RecycledViewPool())
+//            currSize--
+//        }
+//    }
+
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
@@ -61,7 +119,7 @@ class MainAdapter(private val listener: (Entity) -> Unit): ListAdapter<Entity, M
                     filteredList = fullList!!.toMutableList()
                 } else {
                     val keyword = charSequence.toString().toLowerCase(Locale.getDefault()).trim()
-                    filteredList = fullList!!.filter { it.name.toLowerCase(Locale.getDefault()).contains(keyword) }
+                    filteredList = fullList!!.filter { it.name.toLowerCase(Locale.getDefault()).contains(keyword) }.toMutableList()
                 }
 
                 val filterResults = FilterResults()
@@ -71,8 +129,7 @@ class MainAdapter(private val listener: (Entity) -> Unit): ListAdapter<Entity, M
 
             override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
                 @Suppress("UNCHECKED_CAST")
-                submitList(filterResults.values as ArrayList<Entity>)
-                notifyDataSetChanged()
+                this@MainAdapter.updateList(filterResults.values as ArrayList<Entity>)
             }
         }
     }
